@@ -1,6 +1,7 @@
 <?php
 
 namespace Uspdev\Replicado2MongoDB\Collections;
+use MongoDB\BSON\UTCDateTime;
 
 abstract class Collection
 {
@@ -25,5 +26,10 @@ abstract class Collection
         }
 
         return $query;
+    }
+    // Converte uma string com uma data em um objeto DateTime utilizável pelo MongoDB
+    protected function DateTime($str){
+        if (is_null($str)) return NULL;
+        return new UTCDateTime(strtotime($str)*1000);
     }
 }
