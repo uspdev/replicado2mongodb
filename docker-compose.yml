@@ -16,7 +16,7 @@ services:
     user: "${UID:-1000}:${GID:-1000}"
 
   mongodb:
-    image: mongo:7
+    image: mongo:8.0
     container_name: replicado2mongodb_mongodb
     restart: always
     ports:
