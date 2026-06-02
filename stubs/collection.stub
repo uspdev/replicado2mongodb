@@ -5,7 +5,6 @@ namespace Uspdev\Replicado2MongoDB\Collections;
 use Uspdev\Replicado2MongoDB\Contracts\CollectionInterface;
 
 use MongoDB\BSON\UTCDateTime;
-use MongoDB\ClientBulkWrite;
 
 use Uspdev\Replicado2MongoDB\Database\MongoConnection;
 use Uspdev\Replicado\DB as ReplicadoDB;
@@ -14,32 +13,37 @@ class {{ name_lower }}Collection extends Collection implements CollectionInterfa
 {
     public function sync(): void
     {
-        // Pegar dados do replicado
         $query = $this->getQuery('listar{{ name_capitalize }}.sql');
+        $query = str_replace('__unidades__', env('REPLICADO_CODUNDCLG'), $query);
 
         $registros = ReplicadoDB::fetchAll($query);
 
-        //passar os dados do replicado para o mongoDB
+        // Pegar dados do replicado
         $now = new UTCDateTime();
-        $collection = MongoConnection::getCollection('{{ name_lower }}');
-        $bulkWrite  = ClientBulkWrite::createWithCollection($collection);
-
-        foreach ($registros as $registro) {  
-            $bulkWrite->updateOne(
-                [],
-                ['$set'   => [
-                            'updated_at_sync'  => $now
-                             ] 
-                ],
-                ['upsert' => true]
-            );
+        foreach ($registros as $registro) {
+            $bulk[] = [
+                'updateOne' => [
+                    ['codcur' => $registro['codcur']],
+                    [
+                        '$set' => [
+                            'codcur' => $registro['codcur'],
+                            'nomcur' => $registro['nomcur'],
+                            'updated_at_sync' => $now
+                        ]
+                    ],
+                    ['upsert' => true]
+                ]
+            ];
         }
-            
+
+        $collection = MongoConnection::getCollection('{{ name_lower }}');
+        if (!empty($bulk)) {
+            $collection->bulkWrite($bulk);
+        }
+
         // delete antigos
-        $bulkWrite->deleteMany([
+        $collection->deleteMany([
             'updated_at_sync' => ['$lt' => $now]
         ]);
-
-        MongoConnection::getClient()->bulkWrite($bulkWrite);
     }
 }
