@@ -9,15 +9,15 @@ use Uspdev\Replicado2MongoDB\Console\SyncRunner;
 Bootstrap::init();
 
 // Roda uma collection em particular
-/*
-use Uspdev\Replicado2MongoDB\Collections\programasCollection;
-$sync = new programasCollection();
+
+use Uspdev\Replicado2MongoDB\Collections\docentesCollection;
+$sync = new docentesCollection();
 $sync->sync();
-*/
+
 
 // Roda todas collections
-$runner = new SyncRunner();
+/* $runner = new SyncRunner();
 $runner->run();
-
+ */
 
 

@@ -9,18 +9,19 @@ use MongoDB\BSON\UTCDateTime;
 use Uspdev\Replicado2MongoDB\Database\MongoConnection;
 use Uspdev\Replicado\DB as ReplicadoDB;
 
-class {{ name_lower }}Collection extends Collection implements CollectionInterface
+class disciplinasdocentesCollection extends Collection implements CollectionInterface
 {
     public function sync(): void
     {
-        $query = $this->getQuery('listar{{ name_capitalize }}.sql');
-        $query = str_replace('__unidades__', env('REPLICADO_CODUNDCLG'), $query);
+        $query = $this->getQuery('listarDisciplinasDocentes.sql');
+        $query = str_replace('__docentes__', [1963793] ,$query);
+        $query = str_replace('__semestres__', env('REPLICADO_CODUNDCLG'), $query);
 
-        ${{ name_lower }} = ReplicadoDB::fetchAll($query);
+        $disciplinasdocentes = ReplicadoDB::fetchAll($query);
 
         // Pegar dados do replicado
         $now = new UTCDateTime();
-        foreach (${{ name_lower }} as $registro) {
+        foreach ($disciplinasdocentes as $registro) {
             $bulk[] = [
                 'updateOne' => [
                     ['codcur' => $registro['codcur']],
@@ -36,7 +37,7 @@ class {{ name_lower }}Collection extends Collection implements CollectionInterfa
             ];
         }
 
-        $collection = MongoConnection::getCollection('{{ name_lower }}');
+        $collection = MongoConnection::getCollection('disciplinasdocentes');
         if (!empty($bulk)) {
             $collection->bulkWrite($bulk);
         }
