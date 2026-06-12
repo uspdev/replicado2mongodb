@@ -15,9 +15,12 @@ class MongoConnection
             $port = env('REPLICADO2MONGODB_PORT', 27017);
             $user = env('REPLICADO2MONGODB_DB', 'root');
             $pass = env('REPLICADO2MONGODB_PASS', 'replicado2mongodb');
+            
+            $uriOptions = ['socketTimeoutMS' => 900000];
 
             self::$client = new Client(
-                "mongodb://$user:$pass@$host:$port"
+                "mongodb://$user:$pass@$host:$port",
+                $uriOptions
             );
         }
 

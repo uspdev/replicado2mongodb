@@ -1,11 +1,7 @@
 SELECT DISTINCT 
-V.codpes, V.nompes, S.nomset, V.tipmer, V.nomabvcla, V.nomabvfnc, V.sitatl, V.sitoco, V.dtafimvin, V.dtafimdctati
-FROM VINCULOPESSOAUSP V
-INNER JOIN SETOR S
-	ON S.codset = V.codset 
-WHERE V.codfusclgund = __unidades__
-AND V.tipvin = 'SERVIDOR'
-AND V.nomcaa = 'Docente'
-AND V.codset IN (__departamentos__)
-__filtros__
-ORDER BY V.codpes
+V.codpes, V.nompes, S.nomset, V.codset, S.nomabvset, V.tipmer, V.nomabvcla, V.nomabvfnc, V.sitatl, V.sitoco, V.dtafimvin, V.dtafimdctati
+FROM VINCULOPESSOAUSP AS V
+INNER JOIN SETOR AS S ON S.codset = V.codset 
+WHERE V.tipvin = 'SERVIDOR'
+	AND V.nomcaa = 'Docente'
+	AND V.codfusclgund IN (__unidades__)

@@ -9,30 +9,30 @@ use MongoDB\BSON\UTCDateTime;
 use Uspdev\Replicado2MongoDB\Database\MongoConnection;
 use Uspdev\Replicado\DB as ReplicadoDB;
 
-class estagiariosCollection extends Collection implements CollectionInterface
+class posgradCollection extends Collection implements CollectionInterface
 {
     public function sync(): void
     {
-        $query = $this->getQuery('listarEstagiarios.sql', 
+        $query = $this->getQuery('listarPosGrad.sql',
             [       
                 '__unidades__' => env('REPLICADO_CODUNDCLG')
             ]
         );
-        $estagiarios = ReplicadoDB::fetchAll($query);
+
+        $posgrad = ReplicadoDB::fetchAll($query);
 
         // Pegar dados do replicado
         $now = new UTCDateTime();
-        foreach ($estagiarios as $registro) {
+        foreach ($posgrad as $registro) {
             $bulk[] = [
                 'updateOne' => [
                     ['codpes' => $registro['codpes']],
                     [
                         '$set' => [
-                            'codpes'=> $registro['codpes'],
-                            'nome'  => $registro['nompes'],
-                            'setor' => $registro['nomset'],
-                            'inicio'=> explode(' ', $registro['dtainivin'])[0],
-                            'fim'   => explode(' ', $registro['dtafimvin'])[0],
+                            'codpes'   => $registro['codpes'],
+                            'email'    => $registro['codema'],
+                            'nome'     => $registro['nompes'],
+                            'cod_area' => $registro['codare'],
                             'updated_at_sync' => $now
                         ]
                     ],
@@ -41,7 +41,7 @@ class estagiariosCollection extends Collection implements CollectionInterface
             ];
         }
 
-        $collection = MongoConnection::getCollection('estagiarios');
+        $collection = MongoConnection::getCollection('posgrad');
         if (!empty($bulk)) {
             $collection->bulkWrite($bulk);
         }

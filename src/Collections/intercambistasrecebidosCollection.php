@@ -9,30 +9,31 @@ use MongoDB\BSON\UTCDateTime;
 use Uspdev\Replicado2MongoDB\Database\MongoConnection;
 use Uspdev\Replicado\DB as ReplicadoDB;
 
-class estagiariosCollection extends Collection implements CollectionInterface
+class intercambistasrecebidosCollection extends Collection implements CollectionInterface
 {
     public function sync(): void
     {
-        $query = $this->getQuery('listarEstagiarios.sql', 
+        $query = $this->getQuery('listarIntercambistasRecebidos.sql',
             [       
                 '__unidades__' => env('REPLICADO_CODUNDCLG')
             ]
         );
-        $estagiarios = ReplicadoDB::fetchAll($query);
+
+        $intercambistasrecebidos = ReplicadoDB::fetchAll($query);
 
         // Pegar dados do replicado
         $now = new UTCDateTime();
-        foreach ($estagiarios as $registro) {
+        foreach ($intercambistasrecebidos as $registro) {
             $bulk[] = [
                 'updateOne' => [
                     ['codpes' => $registro['codpes']],
                     [
                         '$set' => [
-                            'codpes'=> $registro['codpes'],
-                            'nome'  => $registro['nompes'],
-                            'setor' => $registro['nomset'],
-                            'inicio'=> explode(' ', $registro['dtainivin'])[0],
-                            'fim'   => explode(' ', $registro['dtafimvin'])[0],
+                            'codpes'       => $registro['codpes'],
+                            'nome'         => $registro['nompes'],
+                            'tipo_vinculo' => $registro['tipvin'],
+                            'inicio'       => explode(' ', $registro['dtainivin'] ?? '')[0],
+                            'fim'          => explode(' ', $registro['dtafimvin'] ?? '')[0],
                             'updated_at_sync' => $now
                         ]
                     ],
@@ -41,7 +42,7 @@ class estagiariosCollection extends Collection implements CollectionInterface
             ];
         }
 
-        $collection = MongoConnection::getCollection('estagiarios');
+        $collection = MongoConnection::getCollection('intercambistasrecebidos');
         if (!empty($bulk)) {
             $collection->bulkWrite($bulk);
         }

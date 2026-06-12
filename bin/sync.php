@@ -17,7 +17,7 @@ $sync->sync();
 
 // Roda todas collections
 /* $runner = new SyncRunner();
-$runner->run();
- */
+$runner->run(); */
+
 
 

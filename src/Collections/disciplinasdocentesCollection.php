@@ -13,22 +13,31 @@ class disciplinasdocentesCollection extends Collection implements CollectionInte
 {
     public function sync(): void
     {
-        $query = $this->getQuery('listarDisciplinasDocentes.sql');
-        $query = str_replace('__docentes__', [1963793] ,$query);
-        $query = str_replace('__semestres__', env('REPLICADO_CODUNDCLG'), $query);
-
+        $query = $this->getQuery('listarDisciplinasDocentes.sql',
+            [       
+                '__unidades__' => env('REPLICADO_CODUNDCLG')
+            ]
+        );
         $disciplinasdocentes = ReplicadoDB::fetchAll($query);
+        $qtd = count($disciplinasdocentes);
 
         // Pegar dados do replicado
         $now = new UTCDateTime();
         foreach ($disciplinasdocentes as $registro) {
             $bulk[] = [
                 'updateOne' => [
-                    ['codcur' => $registro['codcur']],
+                    ['nusp_docente' => $registro['codpes'],
+                     'disciplina' => $registro['coddis'],
+                     'turma'      => $registro['codtur']
+                     ],
                     [
                         '$set' => [
-                            'codcur' => $registro['codcur'],
-                            'nomcur' => $registro['nomcur'],
+                            'departamento' => $registro['nomset'],
+                            'merito_docente' => $registro['tipmer'],
+                            'nusp_docente'   => $registro['codpes'],
+                            'nome_docente'   => $registro['nompes'],
+                            'disciplina'    => $registro['coddis'],
+                            'turma'         => $registro['codtur'],
                             'updated_at_sync' => $now
                         ]
                     ],

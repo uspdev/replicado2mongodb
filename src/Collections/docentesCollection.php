@@ -13,13 +13,14 @@ class docentesCollection extends Collection implements CollectionInterface
 {
     public function sync(): void
     {
-        $query = $this->getQuery('listarDocentes.sql');
-        $query = str_replace('__unidades__', env('REPLICADO_CODUNDCLG'), $query);
-        $query = str_replace('__departamentos__', '598,594,598,592,600,601,599,604,603,596', $query);
-        $query = str_replace('__filtros__', '', $query);
+        $query = $this->getQuery('listarDocentes.sql',
+            [       
+                '__unidades__' => env('REPLICADO_CODUNDCLG')
+            ]
+        );
 
         $docentes = ReplicadoDB::fetchAll($query);
-        //,594,598,592,600,601,599,604,603,596
+
         // Pegar dados do replicado
         $now = new UTCDateTime();
         foreach ($docentes as $registro) {
@@ -29,15 +30,17 @@ class docentesCollection extends Collection implements CollectionInterface
                     [
                         '$set' => [
                             'codpes'            => $registro['codpes'],
-                            'nome'              => $registro['nompes'],
-                            'setor'             => $registro['nomset'],
+                            'nome_docente'      => $registro['nompes'],
+                            'nome_setor'        => $registro['nomset'],
+                            'cod_setor'         => $registro['codset'],
+                            'clg_setor'         => $registro['nomabvset'],
                             'merito'            => $registro['tipmer'],
                             'classe'            => $registro['nomabvcla'],
                             'funcao'            => $registro['nomabvfnc'],
                             'status'            => $registro['sitatl'],
                             'ultima_ocorrencia' => $registro['sitoco'],
                             'fim_vinculo'       => explode(' ',$registro['dtafimvin'] ?? '')[0],
-                            'fim_atividade'     => explode(' ',$registro['dtafimdctati'] ?? '')[0] ?? '',
+                            'fim_atividade'     => explode(' ',$registro['dtafimdctati'] ?? '')[0],
                             'updated_at_sync' => $now
                         ]
                     ],
